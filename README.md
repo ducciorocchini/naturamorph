@@ -1,7 +1,6 @@
 # naturamorph
 
-<img width="1536" height="1024" alt="naturamorph" src="https://github.com/user-attachments/assets/d6f44cad-2a58-46ee-abba-a993dcd5c080" />
-
+<img width="1536" height="1024" alt="naturamorph" src="https://github.com/user-attachments/assets/71bcaabb-0637-44c6-84b3-342d6036bb9b" />
 
 **naturamorph** is a Python package for generating **geometrical and morphogenetic shapes inspired by natural systems**.
 
