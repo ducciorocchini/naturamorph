@@ -6,6 +6,12 @@
        width="400">
 </div>
 
+Running it in RStudio?
+Do that first:
+```r
+library(reticulate)
+py_install(c("numpy", "matplotlib"))
+```
 **naturamorph** is a Python package for generating **geometrical and morphogenetic shapes inspired by natural systems**.
 
 The goal of the project is to provide **simple, reproducible, and extensible tools** to model, simulate, and visualize natural forms using **geometry, stochastic processes, and generative algorithms**.
