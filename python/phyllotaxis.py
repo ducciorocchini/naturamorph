@@ -1,47 +1,58 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 
 def phyllotaxis(
     n=4000,
-    c=4.0,                 # scale factor (bigger = more spread)
-    angle_deg=137.507764,  # golden angle in degrees
-    jitter=0.0,            # 0.. small noise
+    c=4.0,
+    angle_deg=137.507764,
+    jitter=0.0,
     seed=0,
-    color_by="index",      # "index" or "radius"
+    color_by="index",        # "index" or "radius"
+    cmap="viridis",          # any matplotlib colormap
     point_size=6,
-    save=None,             # e.g. "phyllotaxis.png"
+    alpha=1.0,
+    save=None,
     show=True
 ):
     rng = np.random.default_rng(seed)
 
-    # indices 1..n
     i = np.arange(1, n + 1)
 
-    # golden-angle spiral
     theta = np.deg2rad(angle_deg) * i
     r = c * np.sqrt(i)
 
-    # convert to Cartesian
     x = r * np.cos(theta)
     y = r * np.sin(theta)
 
     if jitter > 0:
-        x = x + rng.normal(0, jitter, size=n)
-        y = y + rng.normal(0, jitter, size=n)
+        x += rng.normal(0, jitter, size=n)
+        y += rng.normal(0, jitter, size=n)
 
-    # coloring
     if color_by == "radius":
         col = r
     else:
         col = i
 
+    norm = Normalize(vmin=np.min(col), vmax=np.max(col))
+
     fig, ax = plt.subplots(figsize=(7, 7))
-    sc = ax.scatter(x, y, s=point_size, c=col, marker="o", linewidths=0)
+    sc = ax.scatter(
+        x,
+        y,
+        s=point_size,
+        c=col,
+        cmap=cmap,
+        norm=norm,
+        alpha=alpha,
+        linewidths=0
+    )
+
     ax.set_aspect("equal")
     ax.axis("off")
     plt.tight_layout()
 
-    if save is not None:
+    if save:
         plt.savefig(save, dpi=300, bbox_inches="tight", pad_inches=0)
         print(f"Saved {save}")
 
