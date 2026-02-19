@@ -1,93 +1,195 @@
 # 🌻 Phyllotaxis Simulation in Python
 
-A simple implementation of **phyllotaxis** (sunflower / spiral plant growth pattern) using NumPy and Matplotlib.
+A mathematical and visual implementation of **phyllotaxis**, the spiral arrangement observed in sunflowers, pinecones, Romanesco broccoli, and many plants.
 
-Phyllotaxis is generated using the **golden angle**:
+This implementation uses the **golden angle** and square-root radial growth to produce near-uniform packing.
+
+---
+
+# 🧮 Mathematical Development
+
+Phyllotaxis arises from placing points using polar coordinates with a fixed divergence angle.
+
+---
+
+## 1️⃣ Divergence Angle
+
+Each new element is rotated by a constant angle:
 
 [
-\theta = i \cdot 137.507764^\circ
+\theta_i = i \cdot \alpha
 ]
+
+where:
+
+* ( i ) = index of the element
+* ( \alpha ) = divergence angle
+
+The optimal packing occurs when:
 
 [
-r = c \sqrt{i}
+\alpha = 360^\circ \left(1 - \frac{1}{\varphi}\right)
 ]
 
-This produces the characteristic sunflower-like spiral pattern.
+where
+
+[
+\varphi = \frac{1 + \sqrt{5}}{2}
+]
+
+is the **golden ratio**.
+
+Numerically:
+
+[
+\alpha \approx 137.507764^\circ
+]
+
+This angle is irrational relative to (2\pi), which prevents alignment and produces uniform distribution.
 
 ---
 
-## 📦 Requirements
+## 2️⃣ Radial Growth Law
 
-```bash
-pip install numpy matplotlib
-```
+To maintain approximately constant density:
+
+[
+r_i = c \sqrt{i}
+]
+
+Why √i?
+
+The area of a disk grows as:
+
+[
+A = \pi r^2
+]
+
+So to place one point per constant area:
+
+[
+r \propto \sqrt{i}
+]
+
+The constant (c) controls global scale.
 
 ---
 
-## 🚀 Usage Example
+## 3️⃣ Cartesian Conversion
 
-```python
-from phyllotaxis import phyllotaxis
+From polar to Cartesian:
 
-phyllotaxis(
-    n=4500,
-    c=3.8,
-    point_size=6,
-    color_by="index",
-    save="phyllotaxis.png",
-    show=False
-)
-```
+[
+x_i = r_i \cos(\theta_i)
+]
+[
+y_i = r_i \sin(\theta_i)
+]
 
 ---
 
-## 📜 Full Implementation
+## 4️⃣ Fibonacci Spirals (Parastichy)
+
+When (\alpha) is close to the golden angle, visible spiral arms appear.
+
+The number of clockwise and counterclockwise spirals typically correspond to consecutive **Fibonacci numbers**:
+
+21–34
+34–55
+55–89
+
+This is a natural consequence of irrational rotation on the circle.
+
+---
+
+# 🎨 Enhanced Implementation with Colormap Controls
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+
 
 def phyllotaxis(
     n=4000,
-    c=4.0,                 # scale factor (bigger = more spread)
-    angle_deg=137.507764,  # golden angle in degrees
-    jitter=0.0,            # small noise
+    c=4.0,
+    angle_deg=137.507764,
+    jitter=0.0,
     seed=0,
-    color_by="index",      # "index" or "radius"
+    color_by="index",        # "index" or "radius"
+    cmap="viridis",          # any matplotlib colormap
     point_size=6,
-    save=None,             # e.g. "phyllotaxis.png"
+    alpha=1.0,
+    save=None,
     show=True
 ):
+    """
+    Generate and plot a phyllotaxis pattern.
+
+    Parameters
+    ----------
+    n : int
+        Number of points.
+    c : float
+        Radial scaling factor.
+    angle_deg : float
+        Divergence angle in degrees.
+    jitter : float
+        Add small random noise.
+    seed : int
+        Random seed.
+    color_by : str
+        "index" or "radius".
+    cmap : str
+        Matplotlib colormap name.
+    point_size : float
+        Size of scatter points.
+    alpha : float
+        Transparency.
+    save : str or None
+        Save output image.
+    show : bool
+        Display plot.
+    """
+
     rng = np.random.default_rng(seed)
 
-    # indices 1..n
     i = np.arange(1, n + 1)
 
-    # golden-angle spiral
     theta = np.deg2rad(angle_deg) * i
     r = c * np.sqrt(i)
 
-    # convert to Cartesian
     x = r * np.cos(theta)
     y = r * np.sin(theta)
 
     if jitter > 0:
-        x = x + rng.normal(0, jitter, size=n)
-        y = y + rng.normal(0, jitter, size=n)
+        x += rng.normal(0, jitter, size=n)
+        y += rng.normal(0, jitter, size=n)
 
-    # coloring
     if color_by == "radius":
         col = r
     else:
         col = i
 
+    norm = Normalize(vmin=np.min(col), vmax=np.max(col))
+
     fig, ax = plt.subplots(figsize=(7, 7))
-    sc = ax.scatter(x, y, s=point_size, c=col, marker="o", linewidths=0)
+    sc = ax.scatter(
+        x,
+        y,
+        s=point_size,
+        c=col,
+        cmap=cmap,
+        norm=norm,
+        alpha=alpha,
+        linewidths=0
+    )
+
     ax.set_aspect("equal")
     ax.axis("off")
     plt.tight_layout()
 
-    if save is not None:
+    if save:
         plt.savefig(save, dpi=300, bbox_inches="tight", pad_inches=0)
         print(f"Saved {save}")
 
@@ -97,42 +199,16 @@ def phyllotaxis(
         plt.close(fig)
 
     return x, y
-
-
-# Example run
-phyllotaxis(
-    n=4500,
-    c=3.8,
-    point_size=6,
-    color_by="index",
-    save="phyllotaxis.png",
-    show=False
-)
 ```
 
 ---
 
-## ⚙️ Parameters
+# 🚀 Example Usage
 
-| Parameter    | Description                              |
-| ------------ | ---------------------------------------- |
-| `n`          | Number of points                         |
-| `c`          | Scaling factor (controls spacing)        |
-| `angle_deg`  | Divergence angle (137.5° = golden angle) |
-| `jitter`     | Adds randomness                          |
-| `color_by`   | `"index"` or `"radius"`                  |
-| `point_size` | Size of points                           |
-| `save`       | Filename to save image                   |
-| `show`       | Display plot window                      |
-
----
-
-## 🌱 Experiments
-
-### Golden angle (classic sunflower)
+### Classic sunflower
 
 ```python
-phyllotaxis(angle_deg=137.507764)
+phyllotaxis()
 ```
 
 ### Visible spiral arms
@@ -141,10 +217,30 @@ phyllotaxis(angle_deg=137.507764)
 phyllotaxis(angle_deg=136)
 ```
 
+### Botanical tones
+
+```python
+phyllotaxis(cmap="Greens", color_by="radius")
+```
+
+### High contrast scientific
+
+```python
+phyllotaxis(cmap="inferno")
+```
+
 ### Add natural irregularity
 
 ```python
-phyllotaxis(jitter=0.2)
+phyllotaxis(jitter=0.2, alpha=0.8)
+```
+
+---
+
+# 📦 Requirements
+
+```bash
+pip install numpy matplotlib
 ```
 
 ---
