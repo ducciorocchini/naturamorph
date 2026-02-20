@@ -114,18 +114,19 @@ from coral_growth import coral_realistic_growth
 import matplotlib.pyplot as plt
 
 pts = coral_realistic_growth(
-    n_steps=12000,
-    grid_size=451,
-    branch_rate=0.10,
-    lateral_weight=0.45,
-    temperature=2.3
+    n_steps=20000,
+    grid_size=1500,
+    branch_rate=0.70,
+    lateral_weight=0.75,
+    temperature=10,
+    min_dist=2,
+    seed=1
 )
 
-x = pts[:,0]
-y = pts[:,1]
+print(pts.shape)  # deve essere tipo (qualcosa_di_grande, 2)
 
 plt.figure(figsize=(7,7))
-plt.scatter(x, y, s=0.6)
+plt.scatter(pts[:,0], pts[:,1], s=0.4)
 plt.gca().invert_yaxis()
 plt.axis("off")
 plt.show()
