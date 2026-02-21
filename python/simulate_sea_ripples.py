@@ -77,7 +77,7 @@ def simulate_sea_ripples(
     inject_droplet(u, N // 2, N // 2)
 
     fig, ax = plt.subplots(figsize=(6, 6))
-    im = ax.imshow(u, cmap="gray", vmin=-2.5, vmax=2.5, interpolation="bilinear")
+    im = ax.imshow(u, cmap="YlGnBu", vmin=-2.5, vmax=2.5, interpolation="bilinear")
     ax.axis("off")
     plt.tight_layout()
 
